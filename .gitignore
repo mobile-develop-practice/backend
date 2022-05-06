@@ -4,3 +4,4 @@ chat/__pycache__
 db.sqlite3
 
 chromedriver
+.env
