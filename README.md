@@ -20,3 +20,21 @@ python3 -m pip install django djangorestframework channels channels_redis
 ```shell
 docker run -p 6379:6379 -d redis:5
 ```
+
+4. 自动化测试
+
+安装 `Chrome`
+
+安装 `chromedriver`
+```shell
+curl https://chromedriver.storage.googleapis.com/101.0.4951.41/chromedriver_linux64.zip -O
+unzip chromedriver_linux64.zip
+mv chromedriver ../myvenv/bin/
+sourece ../myvenv/bin/activate
+```
+
+安装 `Selenium`
+
+```shell
+python3 -m pip install selenium
+```
