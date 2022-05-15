@@ -1,3 +1,4 @@
+![ci workflow](https://github.com/mobile-develop-practice/backend/actions/workflows/ci.yml/badge.svg) 
 1. 创建 `Python` 虚拟环境并生效
 
 ```shell
