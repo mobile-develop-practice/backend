@@ -8,7 +8,7 @@ source myvenv/bin/activate
 2. 安装必要库
 
 ```shell
-python3 -m pip install django djangorestframework channels channels_redis
+python3 -m pip install django djangorestframework channels channels_redis mysqlclient django-filter Markdown django-cors-headers python-decouple
 ```
 
 3. 启用通道层

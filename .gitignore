@@ -5,3 +5,7 @@ db.sqlite3
 
 chromedriver
 .env
+drf_user/__pycache__
+drf_user/migrations/__pycache__
+drf_user/migrations
+drf_user/signals/__pycache__

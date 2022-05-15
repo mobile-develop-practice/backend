@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 import os
 from decouple import config
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,6 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'drf_user',
+    'rest_framework',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -112,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "Asia/Shanghai"
 
 USE_I18N = True
 
@@ -139,4 +144,61 @@ CHANNEL_LAYERS = {
             "hosts": [('127.0.0.1', 6379)],
         },
     },
+}
+
+AUTH_USER_MODEL = 'drf_user.User'
+
+AUTHENTICATION_BACKENDS = [
+    'drf_user.auth.MultiFieldModelBackend',
+]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# see https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "VERIFYING_KEY": None,
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "JTI_CLAIM": "jti",
+    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+}
+
+USER_SETTINGS = {
+    'DEFAULT_ACTIVE_STATE': True,
+    'OTP': {
+        'LENGTH': 7,
+        'ALLOWED_CHARS': '1234567890',
+        'VALIDATION_ATTEMPTS': 3,
+        'SUBJECT': 'OTP for Verification',
+        'COOLING_PERIOD': 3
+    },
+    'MOBILE_VALIDATION': False,
+    'EMAIL_VALIDATION': False,
+    'REGISTRATION': {
+        'SEND_MAIL': False,
+        'SEND_MESSAGE': False,
+        'MAIL_SUBJECT': 'Welcome to DRF-USER',
+        'SMS_BODY': 'Your account has been created',
+        'TEXT_MAIL_BODY': 'Your account has been created.',
+        'HTML_MAIL_BODY': 'Your account has been created.'
+    }
 }
