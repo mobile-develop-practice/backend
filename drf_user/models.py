@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.utils.text import gettext_lazy as _
+from django.utils import timezone
 
 from drf_user.managers import UserManager
 from drf_user.variables import DESTINATION_CHOICES
@@ -67,6 +68,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         related_query_name="user",
     )
 
+    Requests = models.ManyToManyField("self", through="RequestFriendship", symmetrical= False, related_name="RequestToUser") #cambiar a foreign key
+    Friends = models.ManyToManyField("self", through="Friendship", symmetrical = True, related_name="FriendUser") 
+    Messages = models.ManyToManyField("Message", symmetrical = False, related_name = "MessageUser") #cambiar a foreign key
+
     objects = UserManager()
 
     USERNAME_FIELD = "username"
@@ -77,6 +82,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         verbose_name = _("User")
         verbose_name_plural = _("Users")
+
+    def getRequestsUsers(self):
+        return self.Requests.all()
+        
+    def getFriendsUsers(self):
+        return self.Friends.all()
+
+    def getMessages(self):
+        return self.Messages.all()
 
     def get_full_name(self) -> str:
         """Method to return user's full name"""
@@ -168,3 +182,32 @@ class OTPValidation(models.Model):
 
         verbose_name = _("OTP Validation")
         verbose_name_plural = _("OTP Validations")
+
+class RequestFriendship(models.Model):
+    ID = models.AutoField(primary_key=True) #This is an auto-incrementing primary key.
+    Receiver = models.ForeignKey("User", on_delete = models.CASCADE, null=False, related_name="toRequestUser")
+    Sender = models.ForeignKey("User", on_delete = models.CASCADE, null=False, related_name="ofRequestUser")
+
+    class Meta:
+        unique_together = (("Receiver", "Sender"),)
+
+class Friendship(models.Model):
+    ID = models.AutoField(primary_key=True) #This is an auto-incrementing primary key.
+    Person1 = models.ForeignKey("User", on_delete = models.CASCADE, null=False, related_name="ofFriendUser")
+    Person2 = models.ForeignKey("User", on_delete = models.CASCADE, null=False, related_name="toFriendUser")
+
+
+class Message(models.Model): # many-to-many intermediate table
+    ID = models.AutoField(primary_key=True) #This is an auto-incrementing primary key.
+    Sender = models.OneToOneField(User, on_delete = models.CASCADE, null=False, related_name="ofMessageUser")
+    Receiver = models.OneToOneField(User, on_delete = models.CASCADE, null=False, related_name="toMessageUser")
+    IdentifierNumber = models.IntegerField() #unique for all user
+    Content=models.CharField(null=False, max_length=4096,) #Like Telegram limit
+    CONTENT_TYPE_CHOICES = ( 
+        ("Text", "Text"), 
+        ("Image", "Image"), 
+        ("Audio", "Audio"), 
+        ("Video", "Video") 
+    )
+    Type = models.CharField(null=False, choices=CONTENT_TYPE_CHOICES, max_length=5, default="Text")
+    Date = models.DateTimeField(null=False, auto_now=True) #default server timezone -> Europe/London

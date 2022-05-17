@@ -8,7 +8,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from drf_user import user_settings
-from drf_user.models import User
+from drf_user.models import User, Message, Friendship
 from drf_user.utils import check_validation
 from drf_user.variables import EMAIL
 from drf_user.variables import MOBILE
@@ -383,3 +383,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             token["name"] = user.name
 
         return token
+
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields=('IdentifierNumber', 'Content', 'Type', 'Receiver', 'Sender', 'Date')
+
+
+class FriendshipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Friendship
+        fields=('Person1', 'Person2')
