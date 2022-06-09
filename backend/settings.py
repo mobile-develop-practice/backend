@@ -82,25 +82,25 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#         'TEST': {
-#             'NAME': os.path.join(BASE_DIR, 'db_test.sqlite3')
-#         }
-#     }
-# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chat',
-        'USER': 'test',
-        'PASSWORD': '123456',
-        'OPTIONS': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        'TEST': {
+            'NAME': os.path.join(BASE_DIR, 'db_test.sqlite3')
         }
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'chat',
+#         'USER': 'test',
+#         'PASSWORD': '123456',
+#         'OPTIONS': {
+#         }
+#     }
+# }
 
 
 # Password validation
