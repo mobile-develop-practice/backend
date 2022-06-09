@@ -13,12 +13,30 @@ from drf_user.utils import check_validation
 from drf_user.variables import EMAIL
 from drf_user.variables import MOBILE
 
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields=('IdentifierNumber', 'Content', 'Type', 'Receiver', 'Sender', 'Date')
+
+
+class FriendshipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Friendship
+        fields=('Person1', 'Person2')
+
+class SearchedUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=User
+        fields=('Username', 'Name', 'ProfilePicture')
 
 class UserSerializer(serializers.ModelSerializer):
     """
     UserRegisterSerializer is a model serializer which includes the
     attributes that are required for registering a user.
     """
+    # Requests = SearchedUserSerializer(source = "getRequestsUsers", many=True)
+    # Friends = FriendshipSerializer(source = "getFriendsUsers", many=True)
+    # Messages = MessageSerializer(source = "getMessages", many=True)
 
     def validate_email(self, value: str) -> str:
         """
@@ -383,14 +401,3 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             token["name"] = user.name
 
         return token
-
-class MessageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Message
-        fields=('IdentifierNumber', 'Content', 'Type', 'Receiver', 'Sender', 'Date')
-
-
-class FriendshipSerializer(serializers.ModelSerializer):
-    class Meta:
-        model=Friendship
-        fields=('Person1', 'Person2')

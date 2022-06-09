@@ -21,6 +21,14 @@
             + '/'
         );
 
+        console.log(
+            'ws://'
+            + window.location.host
+            + '/ws/chat/'
+            + roomName
+            + '/'
+            );
+
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
             document.querySelector('#chat-log').value += (data.message + '\n');
@@ -41,6 +49,7 @@
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
+                'from': 'host',
                 'message': message
             }));
             messageInputDom.value = '';

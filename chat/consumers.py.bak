@@ -1,0 +1,111 @@
+# chat/consumers.py
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from django.utils import timezone
+from datetime import datetime
+from drf_user.models import *
+from asgiref.sync import sync_to_async
+
+class ChatConsumer(AsyncWebsocketConsumer):
+    groups = list()
+    async def connect(self):
+        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.room_group_name = 'chat_%s' % self.room_name
+        self.groups.append(self.room_group_name)
+
+        # Join room group
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        self.groups.remove(self.room_group_name)
+        # Leave room group
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    async def sendMessageToClient(self, event):
+        print("sending message to onling user..")
+        await self.send(json.dumps(event["message"]))
+
+    # Receive message from WebSocket
+    async def receive(self, text_data):
+        currentUser = self.room_group_name
+
+        text_data_json = json.loads(text_data)
+        messageIdentifierNumber = text_data_json["identifierNumber"]
+        messageContent = text_data_json["content"]
+        messageType = text_data_json["type"]
+        messageReceiver = text_data_json["receiver"]
+
+        print(text_data_json)
+
+        # onlineUsers = self.channel_layer.__dict__.get('groups')
+        onlineUsers = self.groups
+        print(onlineUsers)
+        if messageReceiver in onlineUsers:
+            jsonMessage = {
+                "responseType": "message",
+                "content": messageContent,
+                "type": messageType,
+                "dateTime" : timezone.now().strftime("%Y-%m-%d %H:%M:%S"), 
+                "contraryUsername" : currentUser
+            }
+            # Send message to room group
+            await self.channel_layer.group_send(
+                messageReceiver,
+                {
+                    'type': 'sendMessageToClient',
+                    'message': jsonMessage
+                }
+            )
+
+            notificationThatTheUserReceivedTheMessage = {
+                "responseType" : "messageStatus",
+                "username" : messageReceiver, 
+                "identifierNumber" : messageIdentifierNumber, 
+                "status" : "client"
+            }
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'sendMessageToClient',
+                    'message': notificationThatTheUserReceivedTheMessage,
+                })
+        else:
+            senderUser = await sync_to_async(User.objects.get)(username = currentUser[5:])
+            receiverUser = await sync_to_async(User.objects.get)(username = messageReceiver)
+
+            #store message in database
+            message = await sync_to_async(Message.objects.create)(
+                Content = messageContent, 
+                Type = messageType,
+                Date = timezone.now(),
+                Sender=senderUser, 
+                Receiver=receiverUser,   
+                IdentifierNumber = messageIdentifierNumber      
+            )
+            await sync_to_async(receiverUser.Messages.add)(message)
+            await sync_to_async(receiverUser.save)()
+
+            await self.send(text_data=json.dumps({
+                "responseType" : "messageStatus",
+                "username" : messageReceiver, 
+                "identifierNumber" : messageIdentifierNumber,
+                "status" : "server"
+            }))
+    # Receive message from room group
+    async def chat_message(self, event):
+        print(event)
+        message = event['message']
+
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'message': message
+        }))

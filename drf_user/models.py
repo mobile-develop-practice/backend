@@ -199,8 +199,8 @@ class Friendship(models.Model):
 
 class Message(models.Model): # many-to-many intermediate table
     ID = models.AutoField(primary_key=True) #This is an auto-incrementing primary key.
-    Sender = models.OneToOneField(User, on_delete = models.CASCADE, null=False, related_name="ofMessageUser")
-    Receiver = models.OneToOneField(User, on_delete = models.CASCADE, null=False, related_name="toMessageUser")
+    Sender = models.OneToOneField(User, on_delete = models.CASCADE, null=True, related_name="ofMessageUser")
+    Receiver = models.OneToOneField(User, on_delete = models.CASCADE, null=True, related_name="toMessageUser")
     IdentifierNumber = models.IntegerField() #unique for all user
     Content=models.CharField(null=False, max_length=4096,) #Like Telegram limit
     CONTENT_TYPE_CHOICES = ( 
